@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ticket_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: gestione_ticket
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend_net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: ticket_keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./keycloak/realms:/opt/keycloak/data/import
+    depends_on:
+      - postgres
+    networks:
+      - backend_net
+
+#  prometheus:
+#    image: prom/prometheus
+#    container_name: ticket_prometheus
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#    networks:
+#      - backend_net
+
+#  grafana:
+#    image: grafana/grafana
+#    container_name: ticket_grafana
+#    ports:
+#      - "3000:3000"
+#    networks:
+#      - backend_net
+
+networks:
+  backend_net:
+    driver: bridge
+
+volumes:
+  pgdata:
